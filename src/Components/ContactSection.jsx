@@ -11,6 +11,7 @@ const ContactSection = () => {
   const [status, setStatus] = useState("");
   const [userIp, setUserIp] = useState("");
   const [isRateLimited, setIsRateLimited] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Check if user has exceeded messaging limit (2 messages per 24 hours per IP/device)
   const checkLimit = (ip) => {
@@ -73,10 +74,11 @@ const ContactSection = () => {
     }
 
     setStatus("sending");
+    setErrorMessage("");
 
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_1u70vo3";
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_i59kaof";
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "UQS0uDfKTCuddSZOHYS";
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "e-y8y8_XeFkgsolYR";
 
     emailjs
       .send(
@@ -88,7 +90,9 @@ const ContactSection = () => {
           message: formData.message,
           to_email: "prabeshbhandary9@gmail.com",
         },
-        publicKey
+        {
+          publicKey: publicKey,
+        }
       )
       .then(() => {
         setStatus("sent");
@@ -111,6 +115,8 @@ const ContactSection = () => {
       })
       .catch((error) => {
         console.error("EmailJS sending failed:", error);
+        const msg = error?.text || error?.message || (typeof error === "string" ? error : "");
+        setErrorMessage(msg || "Something went wrong. Please check your credentials.");
         setStatus("error");
       });
   };
@@ -260,7 +266,7 @@ const ContactSection = () => {
               )}
               {status === "error" && (
                 <p className="text-red-400 text-sm text-center font-medium mt-2">
-                  ❌ Something went wrong. Please try again.
+                  ❌ {errorMessage || "Something went wrong. Please try again."}
                 </p>
               )}
             </form>
