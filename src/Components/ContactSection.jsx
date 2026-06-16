@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Mail, Phone, Linkedin, MapPin } from "lucide-react";
 import emailjs from "@emailjs/browser";
 
@@ -9,26 +9,105 @@ const ContactSection = () => {
     message: "",
   });
   const [status, setStatus] = useState("");
+  const [userIp, setUserIp] = useState("");
+  const [isRateLimited, setIsRateLimited] = useState(false);
+
+  // Check if user has exceeded messaging limit (2 messages per 24 hours per IP/device)
+  const checkLimit = (ip) => {
+    try {
+      const history = JSON.parse(localStorage.getItem("portfolio_message_history") || "[]");
+      const now = Date.now();
+      const oneDayAgo = now - 24 * 60 * 60 * 1000;
+      
+      // Filter message history to only active entries within the last 24h
+      const recentHistory = history.filter(item => item.timestamp > oneDayAgo);
+      
+      // Device level limit: total sent from this browser in past 24h
+      if (recentHistory.length >= 2) {
+        setIsRateLimited(true);
+        return true;
+      }
+      
+      // IP level limit: total sent from this IP in past 24h
+      if (ip) {
+        const ipMessages = recentHistory.filter(item => item.ip === ip);
+        if (ipMessages.length >= 2) {
+          setIsRateLimited(true);
+          return true;
+        }
+      }
+      
+      setIsRateLimited(false);
+      return false;
+    } catch (e) {
+      console.error("Error checking rate limit:", e);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    // Fetch IP address on mount to run IP rate-limit check
+    fetch("https://api.ipify.org?format=json")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ip) {
+          setUserIp(data.ip);
+          checkLimit(data.ip);
+        } else {
+          checkLimit("");
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch IP address, falling back to device-only check:", err);
+        checkLimit("");
+      });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Double check limit immediately before sending
+    if (checkLimit(userIp)) {
+      setStatus("rate-limited");
+      return;
+    }
+
     setStatus("sending");
+
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_f36kguk";
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_9keybmv";
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "UQfu7PphcSsJPNYmC";
 
     emailjs
       .send(
-        "service_f36kguk",       // replace with your Service ID
-        "template_9keybmv",      // replace with your Template ID
+        serviceId,
+        templateId,
         {
           from_name: formData.name,
           from_email: formData.email,
           message: formData.message,
           to_email: "prabeshb655@gmail.com",
         },
-        "UQfu7PphcSsJPNYmC"        // replace with your Public Key
+        publicKey
       )
       .then(() => {
         setStatus("sent");
         setFormData({ name: "", email: "", message: "" });
+        
+        // Add current message to rate limit history
+        try {
+          const history = JSON.parse(localStorage.getItem("portfolio_message_history") || "[]");
+          const now = Date.now();
+          const oneDayAgo = now - 24 * 60 * 60 * 1000;
+          
+          const recentHistory = history.filter(item => item.timestamp > oneDayAgo);
+          recentHistory.push({ timestamp: now, ip: userIp });
+          
+          localStorage.setItem("portfolio_message_history", JSON.stringify(recentHistory));
+          setIsRateLimited(recentHistory.length >= 2 || (userIp && recentHistory.filter(item => item.ip === userIp).length >= 2));
+        } catch (e) {
+          console.error("Error storing message history:", e);
+        }
       })
       .catch(() => {
         setStatus("error");
@@ -161,13 +240,18 @@ const ContactSection = () => {
 
               <button
                 type="submit"
-                disabled={status === "sending"}
+                disabled={status === "sending" || isRateLimited}
                 className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3.5 px-6 rounded-lg transition-colors text-base disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {status === "sending" ? "Sending..." : "Send Message"}
               </button>
 
-              {/* Success / Error Messages */}
+              {/* Success / Error / Rate-limit Messages */}
+              {isRateLimited && (
+                <p className="text-amber-400 text-sm text-center font-medium mt-2">
+                  ⚠️ Limit reached: You can send at most 2 messages per day.
+                </p>
+              )}
               {status === "sent" && (
                 <p className="text-green-400 text-sm text-center font-medium mt-2">
                   ✅ Message sent successfully!

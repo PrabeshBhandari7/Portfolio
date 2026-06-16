@@ -33,7 +33,10 @@ const HeroSection = () => {
 
                         <div className="flex items-center gap-4 pt-9 flex-col sm:flex-row w-full sm:w-auto">
                             {/* Hire Me */}
-                            <button className="bg-cyan-500 hover:bg-cyan-400 hover:scale-105 active:scale-95 transition-all duration-300 text-white font-semibold px-8 py-3 rounded-full w-full sm:w-auto cursor-pointer shadow-lg hover:shadow-cyan-500/20">
+                            <button 
+                                onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+                                className="bg-cyan-500 hover:bg-cyan-400 hover:scale-105 active:scale-95 transition-all duration-300 text-white font-semibold px-8 py-3 rounded-full w-full sm:w-auto cursor-pointer shadow-lg hover:shadow-cyan-500/20"
+                            >
                                 Hire Me
                             </button>
 
