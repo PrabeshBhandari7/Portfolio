@@ -86,7 +86,7 @@ const ContactSection = () => {
           from_name: formData.name,
           from_email: formData.email,
           message: formData.message,
-          to_email: "prabeshb655@gmail.com",
+          to_email: "prabeshbhandary9@gmail.com",
         },
         publicKey
       )
