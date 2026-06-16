@@ -18,16 +18,16 @@ const ContactSection = () => {
       const history = JSON.parse(localStorage.getItem("portfolio_message_history") || "[]");
       const now = Date.now();
       const oneDayAgo = now - 24 * 60 * 60 * 1000;
-      
+
       // Filter message history to only active entries within the last 24h
       const recentHistory = history.filter(item => item.timestamp > oneDayAgo);
-      
+
       // Device level limit: total sent from this browser in past 24h
       if (recentHistory.length >= 2) {
         setIsRateLimited(true);
         return true;
       }
-      
+
       // IP level limit: total sent from this IP in past 24h
       if (ip) {
         const ipMessages = recentHistory.filter(item => item.ip === ip);
@@ -36,7 +36,7 @@ const ContactSection = () => {
           return true;
         }
       }
-      
+
       setIsRateLimited(false);
       return false;
     } catch (e) {
@@ -65,7 +65,7 @@ const ContactSection = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Double check limit immediately before sending
     if (checkLimit(userIp)) {
       setStatus("rate-limited");
@@ -74,9 +74,9 @@ const ContactSection = () => {
 
     setStatus("sending");
 
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_f36kguk";
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_9keybmv";
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "UQfu7PphcSsJPNYmC";
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "sservice_1u70vo3";
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_i59kaof";
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "UQS0uDfKTCuddSZOHYS";
 
     emailjs
       .send(
@@ -93,16 +93,16 @@ const ContactSection = () => {
       .then(() => {
         setStatus("sent");
         setFormData({ name: "", email: "", message: "" });
-        
+
         // Add current message to rate limit history
         try {
           const history = JSON.parse(localStorage.getItem("portfolio_message_history") || "[]");
           const now = Date.now();
           const oneDayAgo = now - 24 * 60 * 60 * 1000;
-          
+
           const recentHistory = history.filter(item => item.timestamp > oneDayAgo);
           recentHistory.push({ timestamp: now, ip: userIp });
-          
+
           localStorage.setItem("portfolio_message_history", JSON.stringify(recentHistory));
           setIsRateLimited(recentHistory.length >= 2 || (userIp && recentHistory.filter(item => item.ip === userIp).length >= 2));
         } catch (e) {
@@ -174,10 +174,10 @@ const ContactSection = () => {
                 <MapPin className="w-6 h-6 text-primary" />
                 <div>
                   <h4 className="font-bold text-white text-base">Location</h4>
-                  <a 
-                    href="https://www.google.com/maps/search/?api=1&query=Kerabari-8+Morang,+Nepal" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Kerabari-8+Morang,+Nepal"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-gray-400 hover:text-primary transition-colors text-sm"
                   >
                     Kerabari-8 Morang, Nepal
