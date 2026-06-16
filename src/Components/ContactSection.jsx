@@ -74,7 +74,7 @@ const ContactSection = () => {
 
     setStatus("sending");
 
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "sservice_1u70vo3";
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_1u70vo3";
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_i59kaof";
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "UQS0uDfKTCuddSZOHYS";
 
@@ -109,7 +109,8 @@ const ContactSection = () => {
           console.error("Error storing message history:", e);
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("EmailJS sending failed:", error);
         setStatus("error");
       });
   };
