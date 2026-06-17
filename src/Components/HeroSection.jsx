@@ -77,5 +77,3 @@ const HeroSection = () => {
 }
 
 export default HeroSection;
-
-#update

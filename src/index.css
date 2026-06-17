@@ -1,31 +1,13 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --primary: #06a2c2;
-  }
+@theme {
+  --color-primary: #06a2c2;
 }
 
-@layer utilities {
-  .bg-primary {
-    background-color: var(--primary);
-  }
-
-  .text-primary {
-    color: var(--primary);
-
-  }
-
-  .form-primary {
-    --tw-gradient-form: var(var(--primary))
-  }
-
-  .to-primary {
-    --tw-gradient-to: var(--primary)
-  }
-
-
+:root {
+  --primary: #06a2c2;
 }
+
 
 @keyframes wave {
   0% {
